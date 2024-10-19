@@ -1,21 +1,55 @@
-class NaveDeCarga {
 
+class Nave {
 	var velocidad = 0
+
+	method propulsar() {
+		velocidad = (velocidad + 20000).min(300000)
+	}
+
+	method prepararseParaViajar() {
+		velocidad = (velocidad + 15000).min(300000)
+	}
+
+	method recibirAmenaza()
+
+	method encontrarseEnemigo() {
+		self.recibirAmenaza()
+		self.propulsar()
+	}
+}
+class NaveDeCarga inherits Nave() {
+
 	var property carga = 0
 
 	method sobrecargada() = carga > 100000
 
 	method excedidaDeVelocidad() = velocidad > 100000
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		carga = 0
+	}
+}
+
+
+class NaveDeCargaDeResiduos inherits NaveDeCarga() {
+
+	var selladaAlVacio = false
+
+	override method recibirAmenaza() {
+		velocidad = 0
+		if (not selladaAlVacio) {carga = 0}
+	}
+
+	override method prepararseParaViajar() {
+		super()
+		selladaAlVacio = true
 	}
 
 }
 
-class NaveDePasajeros {
 
-	var velocidad = 0
+class NaveDePasajeros inherits Nave() {
+
 	var property alarma = false
 	const cantidadDePasajeros = 0
 
@@ -25,14 +59,14 @@ class NaveDePasajeros {
 
 	method estaEnPeligro() = velocidad > self.velocidadMaximaLegal() or alarma
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		alarma = true
 	}
 
 }
 
-class NaveDeCombate {
-	var property velocidad = 0
+class NaveDeCombate inherits Nave() {
+
 	var property modo = reposo
 	const property mensajesEmitidos = []
 
@@ -44,8 +78,14 @@ class NaveDeCombate {
 
 	method estaInvisible() = velocidad < 10000 and modo.invisible()
 
-	method recibirAmenaza() {
+	override method recibirAmenaza() {
 		modo.recibirAmenaza(self)
+	}
+
+	override method prepararseParaViajar() {
+		super()
+		modo.preparacion(self)
+
 	}
 
 }
@@ -58,6 +98,11 @@ object reposo {
 		nave.emitirMensaje("¡RETIRADA!")
 	}
 
+	method preparacion(nave) {
+		nave.emitirMensaje("Saliendo en misión")
+		nave.modo(ataque)
+	}
+
 }
 
 object ataque {
@@ -66,6 +111,10 @@ object ataque {
 
 	method recibirAmenaza(nave) {
 		nave.emitirMensaje("Enemigo encontrado")
+	}
+
+	method preparacion(nave) {
+		nave.emitirMensaje("Volviendo a la base")
 	}
 
 }
